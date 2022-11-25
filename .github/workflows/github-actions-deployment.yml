@@ -1,7 +1,5 @@
 name: Deploy to ECR
-on:
-  push:
-    branches: [ deployment ]
+on: [push]
 jobs:
   build:
     name: Build Image
@@ -20,7 +18,6 @@ jobs:
       uses: aws-actions/amazon-ecr-login@v1
     - name: Build, tag, and push image to Amazon ECR
       env:
-        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         ECR_REPOSITORY: chrisou
         IMAGE_TAG: chrisou_image
       run: |
