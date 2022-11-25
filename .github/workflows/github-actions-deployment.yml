@@ -4,6 +4,7 @@ jobs:
   build:
     name: Build Image
     runs-on: ubuntu-latest
+    environment: ex3env
     permissions:
       id-token: write
       contents: read
