@@ -1,4 +1,7 @@
 name: Deploy to ECR
+on:
+  push:
+    branches: [ deployment ]
 jobs:
   build:
     name: Build Image
