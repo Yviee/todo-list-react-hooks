@@ -22,7 +22,7 @@ jobs:
       uses: aws-actions/amazon-ecr-login@v1
     - name: Build, tag, and push image to Amazon ECR
       env:
-        ECR_REGISTRY: ${{ public.ecr.aws/a2o6r0l6 }}
+        ECR_REGISTRY: ${ public.ecr.aws/a2o6r0l6 }
         ECR_REPOSITORY: chrisou
         IMAGE_TAG: chrisou_image
       run: |
