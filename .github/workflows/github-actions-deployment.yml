@@ -44,21 +44,20 @@ jobs:
   #     id-token: write
   #     contents: read
   #   steps:     
-
-      - name: Deploy to App Runner
-        needs: build
-        id: deploy-apprunner
-        uses: awslabs/amazon-app-runner-deploy@main # Deploy app runner service
-        with:
-          service: app-runner-image-deploy-service
-          image: ${{ steps.build-image.outputs.image }}  
-          access-role-arn: ${{ secrets.ROLE_ARN }}
-          runtime: NODEJS_12          
-          region: ${{ secrets.AWS_REGION }}
-          cpu : 1
-          memory : 2
-          port: 8080
-          wait-for-service-stability: true
+           
+  #     - name: Deploy to App Runner
+  #       id: deploy-apprunner
+  #       uses: awslabs/amazon-app-runner-deploy@main # Deploy app runner service
+  #       with:
+  #         service: app-runner-image-deploy-service
+  #         image: ${{ steps.build-image.outputs.image }}  
+  #         access-role-arn: ${{ secrets.ROLE_ARN }}
+  #         runtime: NODEJS_12          
+  #         region: ${{ secrets.AWS_REGION }}
+  #         cpu : 1
+  #         memory : 2
+  #         port: 8080
+  #         wait-for-service-stability: true
       
-      - name: App Runner output
-        run: echo "App runner output ${{ steps.deploy-apprunner.outputs.service-id }}"
+  #     - name: App Runner output
+  #       run: echo "App runner output ${{ steps.deploy-apprunner.outputs.service-id }}"
