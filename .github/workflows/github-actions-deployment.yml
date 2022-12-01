@@ -17,9 +17,14 @@ jobs:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: ${{ secrets.AWS_REGION }}
-    - name: Login to Amazon ECR
-      id: login-ecr
-      uses: aws-actions/amazon-ecr-login@v1
+    - name: Login to Public ECR
+      uses: docker/login-action@v2
+      with: 
+        registry: public.ecr.aws
+        username: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        password: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      env: 
+        AWS_REGION: ${{ secrets.AWS_REGION }}
     - name: Build, tag, and push image to Amazon ECR
       env:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
@@ -29,31 +34,31 @@ jobs:
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment: ex3env
-    permissions:
-      id-token: write
-      contents: read
-    steps:            
-      - name: Deploy to App Runner
-        id: deploy-apprunner
-        uses: awslabs/amazon-app-runner-deploy@main # Deploy app runner service
-        with:
-          service: app-runner-git-deploy-service
-          #source-connection-arn: ${{ secrets.AWS_CONNECTION_SOURCE_ARN }}
-          repo: https://github.com/${{ github.repository }}
-          branch: ${{ github.ref }}
-          runtime: NODEJS_12
-          build-command: npm install
-          start-command: npm start
-          port: 18000
-          region: ${{ secrets.AWS_REGION }}
-          cpu : 1
-          memory : 2
-          wait-for-service-stability: true
+  # deploy:
+  #   needs: build
+  #   runs-on: ubuntu-latest
+  #   environment: ex3env
+  #   permissions:
+  #     id-token: write
+  #     contents: read
+  #   steps:            
+  #     - name: Deploy to App Runner
+  #       id: deploy-apprunner
+  #       uses: awslabs/amazon-app-runner-deploy@main # Deploy app runner service
+  #       with:
+  #         service: app-runner-git-deploy-service
+  #         #source-connection-arn: ${{ secrets.AWS_CONNECTION_SOURCE_ARN }}
+  #         repo: https://github.com/${{ github.repository }}
+  #         branch: ${{ github.ref }}
+  #         runtime: NODEJS_12
+  #         build-command: npm install
+  #         start-command: npm start
+  #         port: 18000
+  #         region: ${{ secrets.AWS_REGION }}
+  #         cpu : 1
+  #         memory : 2
+  #         wait-for-service-stability: true
       
-      - name: App Runner output
-        run: echo "App runner output ${{ steps.deploy-apprunner.outputs.service-id }}" 
+  #     - name: App Runner output
+  #       run: echo "App runner output ${{ steps.deploy-apprunner.outputs.service-id }}" 
 
