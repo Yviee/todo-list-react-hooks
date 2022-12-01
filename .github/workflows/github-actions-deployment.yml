@@ -33,6 +33,14 @@ jobs:
         docker build -t $REGISTRY/$REGISTRY_ALIAS/$REPOSITORY:$IMAGE_TAG .
         docker push $REGISTRY/$REGISTRY_ALIAS/$REPOSITORY:$IMAGE_TAG
 
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment: ex3env
+    permissions:
+      id-token: write
+      contents: read
+    steps:            
       - name: Deploy to App Runner
         id: deploy-apprunner
         uses: awslabs/amazon-app-runner-deploy@main # Deploy app runner service
