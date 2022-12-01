@@ -11,17 +11,20 @@ jobs:
     steps:
     - name: Check out code
       uses: actions/checkout@v2
+
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v1
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: ${{ secrets.AWS_REGION }}
+
     - name: Login to Amazon ECR Public
       id: login-ecr-public
       uses: aws-actions/amazon-ecr-login@v1
       with: 
         registry-type: public
+
     - name: Build, tag, and push image to Amazon ECR Public
       id: build-image
       env:
@@ -33,15 +36,7 @@ jobs:
         docker build -t $REGISTRY/$REGISTRY_ALIAS/$REPOSITORY:$IMAGE_TAG .
         docker push $REGISTRY/$REGISTRY_ALIAS/$REPOSITORY:$IMAGE_TAG
 
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment: ex3env
-    permissions:
-      id-token: write
-      contents: read
-    steps:            
-      - name: Deploy to App Runner
+    - name: Deploy to App Runner
         id: deploy-apprunner
         uses: awslabs/amazon-app-runner-deploy@main # Deploy app runner service
         with:
@@ -57,4 +52,29 @@ jobs:
       
       - name: App Runner output
         run: echo "App runner output ${{ steps.deploy-apprunner.outputs.service-id }}"
+
+  # deploy:
+  #   needs: build
+  #   runs-on: ubuntu-latest
+  #   environment: ex3env
+  #   permissions:
+  #     id-token: write
+  #     contents: read
+  #   steps:            
+  #     - name: Deploy to App Runner
+  #       id: deploy-apprunner
+  #       uses: awslabs/amazon-app-runner-deploy@main # Deploy app runner service
+  #       with:
+  #         service: app-runner-image-deploy-service
+  #         image: ${{ steps.build-image.outputs.image }}  
+  #         access-role-arn: ${{ secrets.ROLE_ARN }}
+  #         runtime: NODEJS_12          
+  #         region: ${{ secrets.AWS_REGION }}
+  #         cpu : 1
+  #         memory : 2
+  #         port: 8080
+  #         wait-for-service-stability: true
+      
+  #     - name: App Runner output
+  #       run: echo "App runner output ${{ steps.deploy-apprunner.outputs.service-id }}"
 
