@@ -23,40 +23,29 @@ jobs:
       with: 
         registry-type: public
     - name: Build, tag, and push image to Amazon ECR Public
+      id: build-image
       env:
         REGISTRY: ${{ steps.login-ecr-public.outputs.registry }}
         REGISTRY_ALIAS: a2o6r0l6
         REPOSITORY: chrisou
-        IMAGE_TAG: ${{ github.sha }}
+        IMAGE_TAG: chrisou_image
       run: |
         docker build -t $REGISTRY/$REGISTRY_ALIAS/$REPOSITORY:$IMAGE_TAG .
         docker push $REGISTRY/$REGISTRY_ALIAS/$REPOSITORY:$IMAGE_TAG
 
-  # deploy:
-  #   needs: build
-  #   runs-on: ubuntu-latest
-  #   environment: ex3env
-  #   permissions:
-  #     id-token: write
-  #     contents: read
-  #   steps:            
-  #     - name: Deploy to App Runner
-  #       id: deploy-apprunner
-  #       uses: awslabs/amazon-app-runner-deploy@main # Deploy app runner service
-  #       with:
-  #         service: app-runner-git-deploy-service
-  #         #source-connection-arn: ${{ secrets.AWS_CONNECTION_SOURCE_ARN }}
-  #         repo: https://github.com/${{ github.repository }}
-  #         branch: ${{ github.ref }}
-  #         runtime: NODEJS_12
-  #         build-command: npm install
-  #         start-command: npm start
-  #         port: 18000
-  #         region: ${{ secrets.AWS_REGION }}
-  #         cpu : 1
-  #         memory : 2
-  #         wait-for-service-stability: true
+      - name: Deploy to App Runner
+        id: deploy-apprunner
+        uses: awslabs/amazon-app-runner-deploy@main # Deploy app runner service
+        with:
+          service: app-runner-image-deploy-service
+          image: ${{ steps.build-image.outputs.image }}          
+          runtime: NODEJS_12          
+          region: ${{ secrets.AWS_REGION }}
+          cpu : 1
+          memory : 2
+          port: 8080
+          wait-for-service-stability: true
       
-  #     - name: App Runner output
-  #       run: echo "App runner output ${{ steps.deploy-apprunner.outputs.service-id }}" 
+      - name: App Runner output
+        run: echo "App runner output ${{ steps.deploy-apprunner.outputs.service-id }}"
 
